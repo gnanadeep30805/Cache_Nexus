@@ -1,0 +1,476 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  
+  description: AI Student Project Evolution Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: projects
+    description: Project operations
+  - name: similarity
+    description: Similarity and recommendations
+  - name: graph
+    description: Idea graph operations
+  - name: search
+    description: External search operations
+  - name: openai
+    description: OpenAI operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      
+      responses:
+        "200":
+          description: Healthy
+-0
++274
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /projects:
+    get:
+      operationId: getProjects
+      tags: [projects]
+      summary: Get all projects
+      parameters:
+        - name: domain
+          in: query
+          schema:
+            type: string
+        - name: technology
+          in: query
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: submitProject
+      tags: [projects]
+      summary: Submit a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitProjectBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /projects/{id}/similar:
+    get:
+      operationId: getSimilarProjects
+      tags: [similarity]
+      summary: Get similar projects
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        "200":
+          description: Similar projects with scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SimilarProject"
+  /projects/{id}/recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [similarity]
+      summary: Get recommendations for a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendations"
+  /idea-graph:
+    get:
+      operationId: getIdeaGraph
+      tags: [graph]
+      summary: Get idea graph data
+      parameters:
+        - name: threshold
+          in: query
+          schema:
+            type: number
+            default: 0.4
+      responses:
+        "200":
+          description: Graph nodes and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdeaGraph"
+  /innovation-gaps:
+    get:
+      operationId: getInnovationGaps
+      tags: [graph]
+      summary: Get innovation gap suggestions
+      responses:
+        "200":
+          description: Innovation gap suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InnovationGap"
+  /search/github:
+    get:
+      operationId: searchGithub
+      tags: [search]
+      summary: Search GitHub repositories
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: GitHub search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GithubSearchResults"
+  /search/github/analyze:
+    post:
+      operationId: analyzeGithubRepo
+      tags: [search]
+      summary: Analyze a GitHub repository with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeGithubBody"
+      responses:
+        "200":
+          description: AI analysis of the repository
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepoAnalysis"
+  /search/scholar:
+    get:
+      operationId: searchScholar
+      tags: [search]
+      summary: Search Google Scholar papers
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Scholar search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScholarSearchResults"
+  /search/scholar/analyze:
+    post:
+      operationId: analyzeScholarPaper
+      tags: [search]
+      summary: Analyze a Google Scholar paper with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeScholarBody"
+      responses:
+        "200":
+          description: AI analysis of the paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepoAnalysis"
+  /openai/analyze-project:
+    post:
+      operationId: analyzeProject
+      tags: [openai]
+      summary: AI analysis of a submitted platform project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeProjectBody"
+      responses:
+        "200":
+          description: AI analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectAnalysis"
+  /openai/hybrid-idea:
+    post:
+      operationId: generateHybridIdea
+      tags: [openai]
+      summary: Generate a hybrid project idea combining two projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HybridIdeaBody"
+      responses:
+        "200":
+          description: Hybrid idea result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HybridIdea"
+components:
+  schemas:
+    HealthStatus:
+-3
++178
+      properties:
+        status:
+          type: string
+      required:
+        - status
+      required: [status]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+     
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        problemStatement:
+          type: string
+        description:
+          type: string
+        technologies:
+          type: string
+        domain:
+          type: string
+        githubLink:
+          type: string
+          nullable: true
+        keywords:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, title, problemStatement, description, technologies, domain, createdAt]
+    SubmitProjectBody:
+      type: object
+      properties:
+        title:
+          type: string
+        problemStatement:
+          type: string
+        description:
+          type: string
+        technologies:
+          type: string
+        domain:
+          type: string
+        githubLink:
+          type: string
+      required: [title, problemStatement, description, technologies, domain]
+    SimilarProject:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/Project"
+        similarity:
+          type: number
+      required: [project, similarity]
+    Recommendations:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/Project"
+        similarProjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimilarProject"
+        improvements:
+          type: array
+          items:
+            type: string
+        hybridIdeas:
+          type: array
+          items:
+            $ref: "#/components/schemas/HybridSuggestion"
+      required: [project, similarProjects, improvements, hybridIdeas]
+    HybridSuggestion:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        technologies:
+          type: string
+        basedOn:
+          type: array
+          items:
+            type: string
+      required: [title, description, technologies, basedOn]
+    IdeaGraph:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphEdge"
+      required: [nodes, edges]
+    GraphNode:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        domain:
+          type: string
+        technologies:
+          type: string
+      required: [id, label, domain, technologies]
+    GraphEdge:
+      type: object
+      properties:
+        source:
+          type: string
+        target:
+          type: string
+        weight:
+          type: number
+      required: [source, target, weight]
+    InnovationGap:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        missingCombination:
+          type: string
+        suggestedTechnologies:
+          type: string
+        targetDomain:
+          type: string
+      required: [title, description, missingCombination, suggestedTechnologies, targetDomain]
+    GithubRepo:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        fullName:
+          type: string
+        description:
+          type: string
+          nullable: true
+        url:
+          type: string
+        stars:
+          type: integer
+        language:
+          type: string
+          nullable: true
+        topics:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type: string
+        owner:
+          type: string
+        readme:
+          type: string
+          nullable: true
+      required: [id, name, fullName, url, stars, topics, updat...
+[truncated]

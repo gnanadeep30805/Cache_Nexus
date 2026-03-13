@@ -1,0 +1,14 @@
+{
+  "name": "@workspace/api-client-react",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "@workspace/api-zod": "workspace:*",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43"
+  }
+}
